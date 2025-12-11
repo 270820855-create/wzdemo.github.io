@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>涂鸦暴走导航 | DoodleNav</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
+    
+    <!-- React & ReactDOM (UMD) -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Lucide React Icons (UMD) -->
+    <script src="https://unpkg.com/lucide-react@latest/dist/umd/lucide-react.min.js"></script>
+    
+    <!-- Babel Standalone (for JSX/TS) -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              anime: ['"ZCOOL KuaiLe"', 'cursive'],
+              sans: ['"ZCOOL KuaiLe"', 'system-ui', 'sans-serif'],
+            },
+            colors: {
+              'jinx-pink': '#FF0055',
+              'jinx-blue': '#00E5FF',
+              'jinx-dark': '#0F0F0F',
+              'neon-green': '#CCFF00',
+              'paper': '#FFFFFF',
+            },
+            boxShadow: {
+              'sketch': '5px 5px 0px 0px rgba(0,0,0,0.8)',
+              'sketch-hover': '8px 8px 0px 0px rgba(255,0,85,1)',
+              'ink': '0 0 0 3px #000',
+            },
+            animation: {
+              'sketch-shake': 'sketchShake 0.3s infinite',
+              'wiggle': 'wiggle 1s ease-in-out infinite',
+              'float': 'float 4s ease-in-out infinite',
+            },
+            keyframes: {
+              sketchShake: {
+                '0%': { transform: 'translate(1px, 1px) rotate(0deg)' },
+                '10%': { transform: 'translate(-1px, -2px) rotate(-1deg)' },
+                '20%': { transform: 'translate(-3px, 0px) rotate(1deg)' },
+                '30%': { transform: 'translate(3px, 2px) rotate(0deg)' },
+                '40%': { transform: 'translate(1px, -1px) rotate(1deg)' },
+                '50%': { transform: 'translate(-1px, 2px) rotate(-1deg)' },
+                '60%': { transform: 'translate(-3px, 1px) rotate(0deg)' },
+                '70%': { transform: 'translate(3px, 1px) rotate(-1deg)' },
+                '80%': { transform: 'translate(-1px, -1px) rotate(1deg)' },
+                '90%': { transform: 'translate(1px, 2px) rotate(0deg)' },
+                '100%': { transform: 'translate(1px, -2px) rotate(-1deg)' },
+              },
+              wiggle: {
+                '0%, 100%': { transform: 'rotate(-2deg)' },
+                '50%': { transform: 'rotate(2deg)' },
+              },
+              float: {
+                '0%, 100%': { transform: 'translateY(0)' },
+                '50%': { transform: 'translateY(-10px)' },
+              }
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      body {
+        background-color: #FFFFFF;
+        background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 10 L20 20 M30 10 L10 30 M80 80 L90 70' stroke='%23000' stroke-width='2' stroke-opacity='0.05'/%3E%3C/svg%3E");
+        color: #0F0F0F;
+        cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2"><path d="M12 2L2 22h20L12 2z"/></svg>'), auto;
+        overscroll-behavior: none;
+      }
+      .rough-border {
+        border: 3px solid #000;
+        border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+      }
+      .rough-border-sm {
+        border: 2px solid #000;
+        border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+      }
+      .bg-scribble {
+        background-image: repeating-linear-gradient(
+          45deg,
+          transparent,
+          transparent 5px,
+          rgba(0,0,0,0.05) 5px,
+          rgba(0,0,0,0.05) 10px
+        );
+      }
+      ::-webkit-scrollbar {
+        width: 14px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #FFFFFF;
+        border-left: 3px solid #000;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #FF0055;
+        border: 3px solid #000;
+        border-radius: 20px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #00E5FF;
+      }
+    </style>
+
+<link rel="stylesheet" href="/index.css">
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://esm.sh/react@^19.2.1/",
+    "react": "https://esm.sh/react@^19.2.1",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.1/",
+    "lucide-react": "https://esm.sh/lucide-react@^0.559.0"
+  }
+}
+</script>
+  <script type="module" crossorigin src="/assets/index-DPflu6oK.js"></script>
+</head>
+  <body>
+    <svg style="position: absolute; width: 0; height: 0; pointer-events: none;">
+      <defs>
+        <filter id="sketch-filter">
+          <feTurbulence type="fractalNoise" baseFrequency="0.01 0.02" numOctaves="2" result="noise" />
+          <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+      </defs>
+    </svg>
+    <div id="root"></div>
+
+    <script type="text/babel" data-presets="typescript,react">
+      // --- Globals ---
+      const { useState, useEffect, useRef, useMemo, useCallback } = React;
+      const { 
+        Plus, Heart, Zap, Ghost, Trash2, ExternalLink, Search, X, Sparkles, 
+        Smile, Gamepad2, Settings, Bell, Menu, Download, Upload, RotateCcw, 
+        CheckCircle2, Scaling, MousePointer2, Move, ZoomIn, ZoomOut, Grid3X3 
+      } = lucideReact;
+
+      // --- utils/audio.ts ---
+      let audioCtx = null;
+      const getAudioContext = () => {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        return audioCtx;
+      };
+
+      const playSfx = (type) => {
+        try {
+          const ctx = getAudioContext();
+          if (ctx.state === 'suspended') {
+            ctx.resume();
+          }
+          const now = ctx.currentTime;
+          const gain = ctx.createGain();
+          gain.connect(ctx.destination);
+
+          const playOsc = (type, freqStart, freqEnd, dur, vol, delay = 0) => {
+              const osc = ctx.createOscillator();
+              const oscGain = ctx.createGain();
+              osc.connect(oscGain);
+              oscGain.connect(ctx.destination);
+
+              osc.type = type;
+              osc.frequency.setValueAtTime(freqStart, now + delay);
+              if (freqStart !== freqEnd) {
+                  osc.frequency.exponentialRampToValueAtTime(freqEnd, now + delay + dur);
+              }
+              
+              oscGain.gain.setValueAtTime(vol, now + delay);
+              oscGain.gain.exponentialRampToValueAtTime(0.001, now + delay + dur);
+              
+              osc.start(now + delay);
+              osc.stop(now + delay + dur);
+          };
+
+          const playNoise = (dur, filterFreq, vol) => {
+               const bufSize = ctx.sampleRate * dur;
+               const buffer = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+               const data = buffer.getChannelData(0);
+               for(let i=0; i<bufSize; i++) data[i] = Math.random() * 2 - 1;
+
+               const noise = ctx.createBufferSource();
+               noise.buffer = buffer;
+               const noiseGain = ctx.createGain();
+               
+               const filter = ctx.createBiquadFilter();
+               filter.type = 'lowpass';
+               filter.frequency.value = filterFreq;
+
+               noise.connect(filter);
+               filter.connect(noiseGain);
+               noiseGain.connect(ctx.destination);
+               
+               noiseGain.gain.setValueAtTime(vol, now);
+               noiseGain.gain.exponentialRampToValueAtTime(0.001, now + dur);
+               noise.start(now);
+          };
+
+          switch (type) {
+            case 'click': playOsc('sine', 800, 1200, 0.05, 0.2); break;
+            case 'pop': playOsc('sine', 400, 800, 0.1, 0.3); break;
+            case 'open':
+            case 'scribble': playNoise(0.15, 800, 0.2); break;
+            case 'success':
+              playOsc('triangle', 523.25, 523.25, 0.2, 0.1, 0);
+              playOsc('triangle', 659.25, 659.25, 0.2, 0.1, 0.05);
+              playOsc('triangle', 783.99, 783.99, 0.3, 0.1, 0.1);
+              break;
+            case 'delete': playNoise(0.2, 300, 0.3); break;
+            case 'pet-happy':
+              playOsc('sine', 1200, 1500, 0.15, 0.1);
+              playOsc('sine', 1500, 1800, 0.15, 0.1, 0.15);
+              break;
+            case 'pet-surprised': playOsc('square', 300, 800, 0.1, 0.05); break;
+          }
+        } catch (e) {
+          console.warn("Audio play failed", e);
+        }
+      };
+
+      // --- types.ts (Emulated Enums) ---
+      const PetMood = {
+        IDLE: 'IDLE',
+        HAPPY: 'HAPPY',
+        SLEEP: 'SLEEP',
+        SURPRISED: 'SURPRISED',
+        ANGRY: 'ANGRY',
+        LOVE: 'LOVE'
+      };
+
+      // --- constants.ts ---
+      const COLORS = [
+        'bg-jinx-pink',
+        'bg-jinx-blue',
+        'bg-neon-green',
+        'bg-purple-500',
+        'bg-yellow-400',
+        'bg-gray-800',
+      ];
+
+      const CATEGORIES = [
+        { id: 'ALL', label: '全部', icon: '🔥' },
+        { id: 'AI', label: 'AI', icon: '🧠' },
+        { id: 'DESIGN', label: '艺术', icon: '🎨' },
+        { id: 'FRONTEND', label: '代码', icon: '💻' },
+        { id: 'MEDIA', label: '娱乐', icon: '🎮' },
+        { id: 'TOOLS', label: '工具', icon: '🛠️' },
+        { id: 'GAME', label: '街机', icon: '🕹️' },
+      ];
+
+      const PET_SKINS = [
+        { id: 'girl-white', name: '暴走蓝发', avatarColor: '#00E5FF', description: '蓝发双马尾的疯狂少女' },
+        { id: 'girl-pink', name: '粉红魔女', avatarColor: '#FF0055', description: '处于过载状态' },
+        { id: 'cat-orange', name: '墨水猫', avatarColor: '#FDBA74', description: '打翻了墨水瓶' },
+      ];
+
+      const BUILT_IN_GAMES = [
+        { id: 'tetris3d', name: '微型积木', description: 'BUILDER', icon: '🧱', color: 'bg-yellow-400' },
+        { id: 'snake', name: '贪吃蛇', description: 'CLASSIC', icon: '🐍', color: 'bg-neon-green' },
+        { id: 'tictactoe', name: '井字棋', description: 'VS', icon: '❌', color: 'bg-jinx-pink' },
+      ];
+
+      const SEARCH_ENGINES = [
+        { id: 'google', name: 'GO', url: 'https://www.google.com/search?q=' },
+        { id: 'baidu', name: 'DU', url: 'https://www.baidu.com/s?wd=' },
+        { id: 'bilibili', name: 'BILI', url: 'https://search.bilibili.com/all?keyword=' },
+        { id: 'github', name: 'GIT', url: 'https://github.com/search?q=' },
+      ];
+
+      const DEFAULT_LINKS = [
+        { id: '1', title: 'Google', url: 'https://www.google.com', color: 'bg-jinx-blue', icon: '🔍', category: 'TOOLS' },
+        { id: '2', title: 'GitHub', url: 'https://github.com', color: 'bg-black text-white', icon: '🐙', category: 'FRONTEND' },
+        { id: '3', title: 'YouTube', url: 'https://www.youtube.com', color: 'bg-red-600 text-white', icon: '▶️', category: 'MEDIA' },
+        { id: '4', title: 'Bilibili', url: 'https://www.bilibili.com', color: 'bg-jinx-pink', icon: '📺', category: 'MEDIA' },
+        { id: '5', title: 'Twitter', url: 'https://twitter.com', color: 'bg-blue-400', icon: '🕊️', category: 'MEDIA' },
+        { id: '6', title: 'ChatGPT', url: 'https://chat.openai.com', color: 'bg-neon-green', icon: '🧠', category: 'AI' },
+        { id: '7', title: 'Figma', url: 'https://www.figma.com', color: 'bg-purple-600 text-white', icon: '🎨', category: 'DESIGN' },
+        { id: '8', title: 'Dribbble', url: 'https://dribbble.com', color: 'bg-pink-400', icon: '🏀', category: 'DESIGN' },
+      ];
+
+      const CHARACTER_DIALOGS = {
+        'girl-white': { 
+          idle: ["真无聊... 炸点什么吧？", "我不疯，只是有点... 有创意！", "你看见我的枪了吗？", "嘘... 它们在跟我说话。", "我有新主意了！可能会很痛哦！", "嘿！看这里！这里！"],
+          morning: ["醒醒！太阳晒屁股了！", "早起的鸟儿... 被枪打！"],
+          afternoon: ["想喝汽水！要嘶嘶响的那种！", "这地方太安静了..."],
+          evening: ["霓虹灯亮了，好戏开场！", "荧光色才是最棒的颜色！"],
+          night: ["谁睡觉啊？我们要通宵！", "熬夜会让眼睛发光哦！"],
+          happy: ["太棒了！哈哈哈哈！", "完美！爆炸！", "YES! 就这样！"],
+          sleep: ["没电了...", "Zzz... 别吵...", "关机..."],
+          surprised: ["哇哦！你认真的？", "什么鬼？！", "吓我一跳！"],
+          angry: ["别碰我！", "烦死了！走开！💢", "想尝尝子弹吗？"],
+          love: ["你这人还不错。", "❤️", "嘿嘿... 我们是朋友了？"]
+        },
+        'girl-pink': { 
+          idle: ["要来点魔法吗？✨", "别一直盯着我看啦...", "今天的运势是大吉哦！", "我想吃草莓蛋糕~", "哼，勉强陪你一会儿。", "要加油哦！"],
+          morning: ["早安~ 又是元气满满的一天！", "快起床啦笨蛋！"],
+          afternoon: ["下午茶时间到了吗？", "有点困了呢..."],
+          evening: ["晚风很舒服呢~", "要把星星摘下来吗？"],
+          night: ["还不睡吗？会有黑眼圈的。", "晚安... 呼..."],
+          happy: ["好耶！✨", "最喜欢这个了！", "Magic~!"],
+          sleep: ["呼... 呼...", "好梦...", "晚安..."],
+          surprised: ["诶？！", "真的假的？！", "哇啊！"],
+          angry: ["不要！", "笨蛋！💢", "不理你了！"],
+          love: ["最喜欢你了！❤️", "啾~", "永远在一起哦。"]
+        },
+        'cat-orange': {
+          idle: ["喵...", "呼噜... 呼噜...", "（盯着你看）", "（伸懒腰）", "这里有个红点...", "我要小鱼干。"],
+          morning: ["喵？（早饭呢？）", "（踩你的脸）"],
+          afternoon: ["（在阳光下打滚）", "Zzz..."],
+          evening: ["（疯狂跑酷）", "喵！喵！"],
+          night: ["（盯着虚空看）", "呼..."],
+          happy: ["呼噜呼噜~", "喵~（蹭蹭）", "❤️"],
+          sleep: ["Zzz...", "（缩成一团）"],
+          surprised: ["哈？！（炸毛）", "喵嗷！"],
+          angry: ["哈——！", "（咬你一口）", "走开。"],
+          love: ["喵~ ❤️", "（舔手）", "呼噜..."]
+        }
+      };
+
+      // --- Components ---
+
+      // DoodleCard.tsx
+      const DoodleCard = ({ link, onDelete, index }) => {
+        const rotation = useMemo(() => Math.floor(Math.random() * 6) - 3, []);
+        const handleCardClick = () => {
+          playSfx('click');
+          window.open(link.url, '_blank');
+        };
+
+        return (
+          <div 
+            onClick={handleCardClick}
+            className={`relative group rough-border bg-white p-4 transition-all duration-200 ease-out transform hover:-translate-y-1 hover:scale-105 hover:shadow-sketch-hover shadow-sketch flex flex-col justify-between min-h-[160px] overflow-visible z-10 hover:z-20 cursor-pointer`}
+            style={{ '--tw-rotate': `${rotation}deg` }}
+          >
+            <div className="absolute inset-0 opacity-10 bg-scribble pointer-events-none"></div>
+            <div className="absolute -top-3 -right-2 transform rotate-3 z-20">
+              <span className={`text-xs font-black px-3 py-1 bg-black text-white rough-border-sm`}>
+                {link.category}
+              </span>
+            </div>
+            <div className="relative z-10 flex justify-between items-start">
+              <div className={`w-14 h-14 flex items-center justify-center text-3xl ${link.color} text-black border-2 border-black shadow-[3px_3px_0px_#000] rounded-full group-hover:animate-sketch-shake`}>
+                {link.icon}
+              </div>
+              <button 
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDelete(link.id); }}
+                className="opacity-0 group-hover:opacity-100 transition-opacity p-2 text-black hover:text-jinx-pink transform hover:scale-125"
+              >
+                <Trash2 size={20} strokeWidth={3} />
+              </button>
+            </div>
+            <div className="relative z-10 mt-4">
+              <h3 className="font-anime text-xl mb-2 text-black leading-tight break-all border-b-2 border-black/10 pb-1">
+                {link.title}
+              </h3>
+              <a 
+                href={link.url} target="_blank" rel="noreferrer"
+                onClick={(e) => { e.stopPropagation(); playSfx('click'); }}
+                className="inline-flex items-center gap-1 px-2 py-0.5 text-black font-black text-sm uppercase tracking-widest hover:text-jinx-blue hover:underline decoration-wavy decoration-2"
+              >
+                LINK <ExternalLink size={12} strokeWidth={3} />
+              </a>
+            </div>
+            <div className="absolute -bottom-2 -right-2 text-6xl font-black text-black/5 pointer-events-none select-none -rotate-12 font-sans">
+              {index + 1}
+            </div>
+          </div>
+        );
+      };
+
+      // SearchBar.tsx
+      const SearchBar = () => {
+        const [query, setQuery] = useState('');
+        const [isFocused, setIsFocused] = useState(false);
+        const [activeEngine, setActiveEngine] = useState(SEARCH_ENGINES[0]);
+
+        const handleSearch = (e) => {
+          e.preventDefault();
+          if (query.trim()) {
+            playSfx('click');
+            window.open(`${activeEngine.url}${encodeURIComponent(query)}`, '_blank');
+            setQuery('');
+          }
+        };
+
+        return (
+          <div className="w-full max-w-4xl mx-auto mb-8 md:mb-16 relative z-20 px-2 md:px-4">
+            <div className="flex flex-wrap gap-1 md:gap-2 mb-2 pl-2 md:pl-4">
+              {SEARCH_ENGINES.map((engine) => (
+                <button
+                  key={engine.id}
+                  onClick={() => { setActiveEngine(engine); playSfx('pop'); }}
+                  className={`px-2 md:px-4 py-1 font-anime font-bold text-sm md:text-lg transition-all border-2 border-black ${activeEngine.id === engine.id ? 'bg-jinx-pink text-white -translate-y-1 rotate-1 shadow-[2px_2px_0_#000]' : 'bg-white text-gray-500 hover:bg-gray-100 -rotate-1'}`}
+                  style={{ borderRadius: '255px 15px 225px 15px / 15px 225px 15px 255px' }}
+                >
+                  {engine.name}
+                </button>
+              ))}
+            </div>
+            <form onSubmit={handleSearch} className="relative">
+              <div className={`relative flex items-center bg-white border-[3px] border-black p-2 md:p-4 transition-all duration-300 rough-border ${isFocused ? 'shadow-[4px_4px_0px_#00E5FF] md:shadow-[8px_8px_0px_#00E5FF] -translate-y-1' : 'shadow-sketch'} z-20`}>
+                <div className="p-1 md:p-2 mr-2 md:mr-4 animate-wiggle">
+                   <Search className="text-black w-6 h-6 md:w-8 md:h-8" strokeWidth={3} />
+                </div>
+                <input
+                  type="text"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  onFocus={() => setIsFocused(true)}
+                  onBlur={() => setIsFocused(false)}
+                  placeholder={`SEARCH ON ${activeEngine.name}...`}
+                  className="w-full text-lg md:text-2xl font-anime font-bold bg-transparent outline-none placeholder-gray-300 text-black tracking-wider uppercase min-w-0"
+                />
+                <button type="submit" className="hidden sm:block bg-neon-green text-black font-anime font-black text-lg md:text-xl px-4 md:px-8 py-1 md:py-2 border-2 border-black hover:bg-black hover:text-neon-green transition-all ml-2 shadow-[2px_2px_0_#000]" style={{ borderRadius: '15px 225px 15px 255px / 255px 15px 225px 15px' }}>
+                  GO!
+                </button>
+              </div>
+            </form>
+          </div>
+        );
+      };
+
+      // AddLinkModal.tsx
+      const AddLinkModal = ({ isOpen, onClose, onAdd }) => {
+        const [title, setTitle] = useState('');
+        const [url, setUrl] = useState('');
+        const [icon, setIcon] = useState('🔗');
+        const [color, setColor] = useState(COLORS[0]);
+        const [category, setCategory] = useState('TOOLS');
+
+        if (!isOpen) return null;
+
+        const handleSubmit = (e) => {
+          e.preventDefault();
+          if (!title || !url) return;
+          let formattedUrl = url;
+          if (!/^https?:\/\//i.test(url)) formattedUrl = `https://${url}`;
+          onAdd({ title, url: formattedUrl, icon, color, category });
+          setTitle(''); setUrl(''); onClose();
+        };
+
+        return (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
+            <div className="bg-white rough-border w-full max-w-lg shadow-sketch-hover relative animate-pop p-8 bg-scribble">
+              <button onClick={() => { onClose(); playSfx('click'); }} className="absolute -top-4 -right-4 bg-jinx-pink border-2 border-black p-2 text-white hover:rotate-90 transition-transform shadow-[3px_3px_0_#000] rounded-full"><X size={24} /></button>
+              <h2 className="font-anime text-5xl text-black mb-8 text-center" style={{ textShadow: '3px 3px 0 #CCFF00' }}>NEW LINK</h2>
+              <form onSubmit={handleSubmit} className="space-y-6 font-anime text-xl">
+                <div>
+                  <label className="block mb-2 font-black bg-black text-white inline-block px-2 transform -rotate-2">TITLE</label>
+                  <input required value={title} onChange={e => setTitle(e.target.value)} className="w-full border-[3px] border-black p-3 bg-white focus:shadow-[4px_4px_0_#00E5FF] outline-none" placeholder="Site Name" />
+                </div>
+                <div>
+                  <label className="block mb-2 font-black bg-black text-white inline-block px-2 transform rotate-1">URL</label>
+                  <input required value={url} onChange={e => setUrl(e.target.value)} className="w-full border-[3px] border-black p-3 bg-white focus:shadow-[4px_4px_0_#00E5FF] outline-none" placeholder="https://..." />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                   <div>
+                      <label className="block mb-2 font-black">ICON</label>
+                      <input value={icon} onChange={e => setIcon(e.target.value)} className="w-full border-[3px] border-black p-3 text-center" maxLength={2} />
+                   </div>
+                   <div>
+                      <label className="block mb-2 font-black">COLOR</label>
+                      <div className="flex gap-2 justify-center">
+                        {COLORS.slice(0,4).map(c => (
+                          <button key={c} type="button" onClick={() => { setColor(c); playSfx('pop'); }} className={`w-8 h-8 rounded-full border-2 border-black ${c} ${color === c ? 'ring-2 ring-black ring-offset-2' : ''}`} />
+                        ))}
+                      </div>
+                   </div>
+                </div>
+                <button type="submit" className="w-full mt-4 bg-neon-green text-black font-black text-2xl py-3 border-[3px] border-black hover:bg-black hover:text-neon-green transition-all shadow-[5px_5px_0_#000] active:translate-y-1 active:shadow-none rough-border-sm">
+                  CREATE!
+                </button>
+              </form>
+            </div>
+          </div>
+        );
+      };
+
+      // SettingsModal.tsx
+      const SettingsModal = ({ isOpen, onClose, links, onImport, onReset, petScale, onScaleChange }) => {
+        if (!isOpen) return null;
+        return (
+          <div className="fixed inset-0 bg-jinx-pink/30 backdrop-blur-sm flex items-center justify-center z-[70] p-4">
+            <div className="bg-white rough-border w-full max-w-2xl shadow-sketch-hover relative p-8">
+              <div className="flex justify-between items-center mb-8 border-b-4 border-black pb-4">
+                <h2 className="font-anime text-4xl text-black font-black">SYSTEM_CONFIG</h2>
+                <button onClick={() => { onClose(); playSfx('click'); }} className="bg-black text-white p-2 hover:bg-jinx-blue transition-colors"><X size={28} /></button>
+              </div>
+              <div className="space-y-6 font-anime">
+                  <div className="border-[3px] border-black p-4 bg-scribble relative mt-2">
+                     <div className="absolute -top-3 left-4 bg-neon-green border-2 border-black px-2 text-sm font-bold rotate-1 shadow-[2px_2px_0_#000]">
+                       人物模型大小 (PET SIZE)
+                     </div>
+                     <div className="flex items-center gap-4 mt-4">
+                       <Scaling size={28} strokeWidth={2.5} />
+                       <input 
+                          type="range" min="0.3" max="2.0" step="0.1"
+                          value={petScale}
+                          onChange={(e) => onScaleChange(parseFloat(e.target.value))}
+                          className="w-full h-4 bg-gray-200 rounded-lg cursor-pointer border-2 border-black accent-jinx-pink"
+                       />
+                       <span className="font-bold text-2xl min-w-[3ch] text-right">{petScale.toFixed(1)}x</span>
+                     </div>
+                  </div>
+                  <div className="grid gap-6 pt-2">
+                      <button onClick={() => playSfx('pop')} className="p-4 border-[3px] border-black bg-paper hover:bg-jinx-blue hover:text-white transition-all text-2xl font-bold flex items-center justify-center gap-4 shadow-[4px_4px_0_#000] active:translate-y-1 active:shadow-none">
+                          <Download /> EXPORT DATA
+                      </button>
+                      <button onClick={() => playSfx('pop')} className="p-4 border-[3px] border-black bg-paper hover:bg-neon-green hover:text-black transition-all text-2xl font-bold flex items-center justify-center gap-4 shadow-[4px_4px_0_#000] active:translate-y-1 active:shadow-none">
+                          <Upload /> IMPORT DATA
+                      </button>
+                      <button onClick={onReset} className="p-4 border-[3px] border-black bg-red-500 text-white hover:bg-black transition-all text-2xl font-bold flex items-center justify-center gap-4 shadow-[4px_4px_0_#000] active:translate-y-1 active:shadow-none">
+                          <RotateCcw /> RESET SYSTEM
+                      </button>
+                  </div>
+              </div>
+            </div>
+          </div>
+        );
+      };
+
+      // GameCenterModal.tsx + NanoBuilder
+      const CUBE_SIZE = 32; 
+      const GRID_SIZE = 20;
+      const PALETTE = [
+        { id: 'red', color: '#E11D48', top: '#F43F5E', side: '#BE123C' },
+        { id: 'yellow', color: '#FACC15', top: '#FDE047', side: '#EAB308' },
+        { id: 'black', color: '#171717', top: '#262626', side: '#000000' },
+        { id: 'white', color: '#E5E7EB', top: '#F3F4F6', side: '#D1D5DB' },
+        { id: 'skin', color: '#FDBA74', top: '#FED7AA', side: '#FB923C' },
+        { id: 'brown', color: '#78350F', top: '#92400E', side: '#451A03' },
+        { id: 'pink', color: '#F472B6', top: '#FBCFE8', side: '#DB2777' },
+        { id: 'blue', color: '#3B82F6', top: '#60A5FA', side: '#2563EB' },
+      ];
+
+      const Cube = React.memo(({ x, y, z, colorIndex, onClick }) => {
+        const p = PALETTE[colorIndex];
+        const faceStyle = (tr, bg, isTop = false) => ({
+          position: 'absolute', width: '100%', height: '100%', backgroundColor: bg, transform: tr, border: '1px solid rgba(0,0,0,0.15)', boxSizing: 'border-box', cursor: 'pointer',
+        });
+        const handleFaceClick = (e, face) => { e.stopPropagation(); onClick(e, x, y, z, face); };
+
+        return (
+          <div style={{ position: 'absolute', width: CUBE_SIZE, height: CUBE_SIZE, transform: `translate3d(${x * CUBE_SIZE}px, ${-y * CUBE_SIZE}px, ${z * CUBE_SIZE}px)`, transformStyle: 'preserve-3d' }}>
+            <div onClick={(e) => handleFaceClick(e, 'front')} style={faceStyle(`rotateY(0deg) translateZ(${CUBE_SIZE/2}px)`, p.color)} />
+            <div onClick={(e) => handleFaceClick(e, 'back')} style={faceStyle(`rotateY(180deg) translateZ(${CUBE_SIZE/2}px)`, p.side)} />
+            <div onClick={(e) => handleFaceClick(e, 'right')} style={faceStyle(`rotateY(90deg) translateZ(${CUBE_SIZE/2}px)`, p.side)} />
+            <div onClick={(e) => handleFaceClick(e, 'left')} style={faceStyle(`rotateY(-90deg) translateZ(${CUBE_SIZE/2}px)`, p.side)} />
+            <div onClick={(e) => handleFaceClick(e, 'top')} style={faceStyle(`rotateX(90deg) translateZ(${CUBE_SIZE/2}px)`, p.top, true)}>
+              <div style={{ position: 'absolute', top: '15%', left: '15%', width: '70%', height: '70%', backgroundColor: p.top, borderRadius: '50%', transform: 'translateZ(4px)', boxShadow: 'inset 2px 2px 4px rgba(255,255,255,0.4), inset -2px -2px 4px rgba(0,0,0,0.2), 2px 2px 4px rgba(0,0,0,0.15)', border: `1px solid ${p.color}`, pointerEvents: 'none' }} />
+            </div>
+            <div onClick={(e) => handleFaceClick(e, 'bottom')} style={faceStyle(`rotateX(-90deg) translateZ(${CUBE_SIZE/2}px)`, p.side)} />
+          </div>
+        );
+      }, (prev, next) => prev.colorIndex === next.colorIndex && prev.x === next.x && prev.y === next.y && prev.z === next.z);
+
+      const NanoBuilder = () => {
+        const [blocks, setBlocks] = useState({});
+        const [selectedColorIdx, setSelectedColorIdx] = useState(0); 
+        const [tool, setTool] = useState('build');
+        const blocksRef = useRef(blocks);
+        const toolRef = useRef(tool);
+        const colorRef = useRef(selectedColorIdx);
+        useEffect(() => { blocksRef.current = blocks; }, [blocks]);
+        useEffect(() => { toolRef.current = tool; }, [tool]);
+        useEffect(() => { colorRef.current = selectedColorIdx; }, [selectedColorIdx]);
+        
+        const sceneRef = useRef(null);
+        const isDragging = useRef(false);
+        const lastMouse = useRef({ x: 0, y: 0 });
+        const camera = useRef({ rotX: -30, rotY: 45, zoom: 0.8 });
+
+        useEffect(() => {
+          const newMap = {};
+          const add = (x, y, z, cIdx) => { newMap[`${x},${y},${z}`] = { colorIndex: cIdx }; };
+          for(let x=-2; x<=2; x++) for(let z=-2; z<=2; z++) add(x, 0, z, 0); 
+          for(let y=1; y<=4; y++) for(let x=-3; x<=3; x++) for(let z=-2; z<=2; z++) { if(Math.abs(x)===3 && Math.abs(z)===2) continue; add(x, y, z, 5); }
+          for(let x=-2; x<=2; x++) { add(x, 2, 2, 4); add(x, 3, 2, 4); }
+          add(-1, 3, 3, 2); add(1, 3, 3, 2); add(0, 2, 3, 2); 
+          add(-4, 5, 0, 5); add(-4, 5, 1, 6); add(4, 5, 0, 5); add(4, 5, 1, 6);  
+          for(let x=-2; x<=2; x++) for(let z=-2; z<=1; z++) add(x, 5, z, 0); 
+          add(0, 6, -1, 1); 
+          setBlocks(newMap); updateCameraTransform();
+        }, []);
+
+        const updateCameraTransform = () => {
+          if (sceneRef.current) {
+              const { rotX, rotY, zoom } = camera.current;
+              sceneRef.current.style.transform = `scale(${zoom}) rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+          }
+        };
+
+        const handleMouseDown = (e) => {
+           if (e.button === 0 && !e.altKey) { 
+               isDragging.current = true;
+               lastMouse.current = { x: e.clientX, y: e.clientY };
+           }
+        };
+        const handleMouseMove = (e) => {
+          if (isDragging.current) {
+              const dx = e.clientX - lastMouse.current.x;
+              const dy = e.clientY - lastMouse.current.y;
+              lastMouse.current = { x: e.clientX, y: e.clientY };
+              camera.current.rotY += dx * 0.5;
+              camera.current.rotX -= dy * 0.5;
+              camera.current.rotX = Math.max(-90, Math.min(0, camera.current.rotX));
+              requestAnimationFrame(updateCameraTransform);
+          }
+        };
+        const handleTouchStart = (e) => {
+            isDragging.current = true;
+            lastMouse.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        };
+        const handleTouchMove = (e) => {
+            if (isDragging.current) {
+              const dx = e.touches[0].clientX - lastMouse.current.x;
+              const dy = e.touches[0].clientY - lastMouse.current.y;
+              lastMouse.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+              camera.current.rotY += dx * 0.5;
+              camera.current.rotX -= dy * 0.5;
+              camera.current.rotX = Math.max(-90, Math.min(0, camera.current.rotX));
+              requestAnimationFrame(updateCameraTransform);
+            }
+        };
+        const handlePointerUp = () => { isDragging.current = false; };
+        const zoom = (delta) => {
+            camera.current.zoom = Math.max(0.3, Math.min(3, camera.current.zoom + delta));
+            requestAnimationFrame(updateCameraTransform);
+        };
+        const handleWheel = (e) => { zoom(-Math.sign(e.deltaY) * 0.1); };
+
+        const handleBlockClick = useCallback((e, bx, by, bz, face) => {
+            const isAlt = e.altKey;
+            const currentTool = toolRef.current;
+            if (currentTool === 'delete' || isAlt) {
+                playSfx('delete');
+                setBlocks(prev => { const next = { ...prev }; delete next[`${bx},${by},${bz}`]; return next; });
+                return;
+            }
+            let nx = bx, ny = by, nz = bz;
+            if (face === 'top') ny++;
+            if (face === 'bottom') ny--;
+            if (face === 'left') nx--;
+            if (face === 'right') nx++;
+            if (face === 'front') nz++;
+            if (face === 'back') nz--;
+            const key = `${nx},${ny},${nz}`;
+            if (!blocksRef.current[key]) {
+                playSfx('click');
+                setBlocks(prev => ({ ...prev, [key]: { colorIndex: colorRef.current } }));
+            }
+        }, []); 
+
+        const handleBasePlateClick = (x, z) => {
+            if (toolRef.current === 'delete') return;
+            const key = `${x},0,${z}`;
+            if (!blocksRef.current[key]) {
+              playSfx('click');
+              setBlocks(prev => ({ ...prev, [key]: { colorIndex: colorRef.current } }));
+            }
+        };
+
+        return (
+          <div className="w-full h-full flex flex-col relative bg-gray-50 select-none overflow-hidden">
+              <div className="absolute top-4 left-4 right-4 z-40 bg-white border-[3px] border-black p-2 md:p-3 shadow-[4px_4px_0_#000] flex flex-col gap-2 rounded-lg max-w-sm">
+                   <div className="flex gap-2">
+                       <button onClick={() => setTool('build')} className={`flex-1 py-2 font-bold border-2 border-black flex items-center justify-center gap-1 md:gap-2 text-sm md:text-base ${tool === 'build' ? 'bg-neon-green' : 'bg-gray-100'}`}><MousePointer2 size={16} /> BUILD</button>
+                       <button onClick={() => setTool('delete')} className={`flex-1 py-2 font-bold border-2 border-black flex items-center justify-center gap-1 md:gap-2 text-sm md:text-base ${tool === 'delete' ? 'bg-red-500 text-white' : 'bg-gray-100'}`}><Trash2 size={16} /> ERASE</button>
+                   </div>
+                   <div className="grid grid-cols-8 gap-1 md:gap-2">
+                       {PALETTE.map((p, idx) => (
+                           <button key={p.id} onClick={() => { setSelectedColorIdx(idx); playSfx('pop'); }} className={`w-6 h-6 md:w-8 md:h-8 rounded-full border-2 border-black ${selectedColorIdx === idx ? 'ring-2 ring-black ring-offset-2 scale-110' : ''}`} style={{ backgroundColor: p.color }} />
+                       ))}
+                   </div>
+                   <div className="flex gap-2 justify-between">
+                      <button onClick={() => setBlocks({})} className="px-2 py-1 border-2 border-black bg-gray-200 hover:bg-red-100 font-bold text-xs flex items-center"><RotateCcw size={12} className="inline mr-1"/> RESET</button>
+                      <div className="flex gap-1 md:hidden">
+                          <button onClick={() => zoom(0.2)} className="p-1 border-2 border-black bg-white"><ZoomIn size={16}/></button>
+                          <button onClick={() => zoom(-0.2)} className="p-1 border-2 border-black bg-white"><ZoomOut size={16}/></button>
+                      </div>
+                   </div>
+              </div>
+              <div className="flex-1 cursor-move relative perspective-container touch-none" onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handlePointerUp} onMouseLeave={handlePointerUp} onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handlePointerUp} onWheel={handleWheel} style={{ perspective: '1200px', overflow: 'hidden' }}>
+                  <div ref={sceneRef} className="absolute left-1/2 top-1/2 w-0 h-0" style={{ transformStyle: 'preserve-3d' }}>
+                      <div style={{ transform: `rotateX(90deg) translateZ(${-CUBE_SIZE/2}px)`, width: GRID_SIZE * CUBE_SIZE, height: GRID_SIZE * CUBE_SIZE, position: 'absolute', top: -(GRID_SIZE * CUBE_SIZE)/2, left: -(GRID_SIZE * CUBE_SIZE)/2, display: 'grid', gridTemplateColumns: `repeat(${GRID_SIZE}, 1fr)`, backgroundColor: 'rgba(255,255,255,0.4)', backgroundImage: 'linear-gradient(to right, rgba(0,0,0,0.1) 1px, transparent 1px), linear-gradient(to bottom, rgba(0,0,0,0.1) 1px, transparent 1px)', backgroundSize: `${CUBE_SIZE}px ${CUBE_SIZE}px`, border: '4px solid #000' }}>
+                          {Array.from({ length: GRID_SIZE * GRID_SIZE }).map((_, i) => {
+                              const x = (i % GRID_SIZE) - GRID_SIZE/2;
+                              const z = Math.floor(i / GRID_SIZE) - GRID_SIZE/2;
+                              return <div key={i} onClick={(e) => { e.stopPropagation(); handleBasePlateClick(x, z); }} className="cursor-pointer" />;
+                          })}
+                      </div>
+                      {Object.entries(blocks).map(([key, data]) => {
+                          const [x, y, z] = key.split(',').map(Number);
+                          return <Cube key={key} x={x} y={y} z={z} colorIndex={data.colorIndex} onClick={handleBlockClick} />;
+                      })}
+                  </div>
+              </div>
+          </div>
+        );
+      };
+
+      const GameCenterModal = ({ gameId, onClose }) => {
+        const gameConfig = BUILT_IN_GAMES.find(g => g.id === gameId);
+        if (!gameId || !gameConfig) return null;
+        return (
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-[80] p-0 md:p-4">
+            <div className="bg-white rough-border w-full md:max-w-6xl shadow-[10px_10px_0_#FF0055] relative flex flex-col h-full md:h-[85vh] rounded-none md:rounded-[15px]">
+              <div className={`p-3 md:p-4 border-b-4 border-black flex justify-between items-center ${gameConfig.color}`}>
+                <div className="flex items-center gap-3">
+                   <span className="text-2xl md:text-3xl bg-white rounded-full p-1 border-2 border-black">{gameConfig.icon}</span>
+                   <h2 className="font-anime text-2xl md:text-3xl text-black font-black tracking-tighter">{gameConfig.name}</h2>
+                </div>
+                <button onClick={onClose} className="bg-black text-white p-2 rounded-full border-2 border-white hover:rotate-90 transition-transform shadow-lg"><X size={20}/></button>
+              </div>
+              <div className="flex-1 bg-gray-100 p-0 flex flex-col overflow-hidden relative">
+                 {gameId === 'tetris3d' ? <NanoBuilder /> : (
+                   <div className="flex flex-col items-center justify-center h-full bg-scribble">
+                       <div className="text-8xl mb-8 animate-bounce">{gameConfig.icon}</div>
+                       <div className="text-4xl font-anime font-black uppercase tracking-widest bg-black text-white px-4 py-2 rotate-2">{gameConfig.id}</div>
+                       <p className="font-anime text-xl mt-8 font-bold text-gray-500">Coming Soon...</p>
+                   </div>
+                 )}
+              </div>
+            </div>
+          </div>
+        );
+      };
+
+      // Pet.tsx
+      const Pet = ({ mood, setMood, skinId, scale }) => {
+        const [message, setMessage] = useState('');
+        const [showBubble, setShowBubble] = useState(false);
+        const [isDragging, setIsDragging] = useState(false);
+        const [x, setX] = useState(window.innerWidth - 450);
+        const [y, setY] = useState(0);
+        const [direction, setDirection] = useState(1);
+        const [isWalking, setIsWalking] = useState(false);
+        const [eyePosition, setEyePosition] = useState({ x: 0, y: 0 });
+        const [blink, setBlink] = useState(false);
+        const containerRef = useRef(null);
+        const clickTimeoutRef = useRef(null);
+        const walkIntervalRef = useRef(null);
+        const isCat = skinId === 'cat-orange';
+        const isPinkSkin = skinId === 'girl-pink';
+
+        const getCurrentMessages = () => CHARACTER_DIALOGS[skinId] || CHARACTER_DIALOGS['girl-white'];
+        const colors = isPinkSkin ? { hair: '#FF6699', hairShadow: '#CC3366', skin: '#FFF0E5', eyes: '#33CCFF', clothes: '#222', highlight: '#FFF', blush: '#FFB6C1', acc: '#FFF' } : { hair: '#00E5FF', hairShadow: '#00B2CC', skin: '#FFFAFA', eyes: '#FF0055', clothes: '#1A1A1A', highlight: '#FFFFFF', blush: '#FFB6C1', acc: '#CCFF00' };
+
+        useEffect(() => {
+          const handleMouseMove = (e) => {
+            if (!containerRef.current) return;
+            const rect = containerRef.current.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            const dx = (e.clientX - centerX) * direction;
+            const dy = e.clientY - centerY;
+            const angle = Math.atan2(dy, dx);
+            const distance = Math.min(isCat ? 2 : 2.5, Math.hypot(dx, dy) / 30);
+            setEyePosition({ x: Math.cos(angle) * distance, y: Math.sin(angle) * distance });
+          };
+          window.addEventListener('mousemove', handleMouseMove);
+          return () => window.removeEventListener('mousemove', handleMouseMove);
+        }, [isCat, direction]);
+
+        useEffect(() => {
+          const blinkInterval = setInterval(() => { setBlink(true); setTimeout(() => setBlink(false), 150); }, 4000 + Math.random() * 2000);
+          return () => clearInterval(blinkInterval);
+        }, []);
+
+        useEffect(() => {
+          const planNextMove = () => {
+            if (isDragging) return;
+            if (Math.random() < 0.5) {
+              const screenWidth = window.innerWidth;
+              const maxStep = 300;
+              const minStep = 50;
+              let step = minStep + Math.random() * (maxStep - minStep);
+              if (Math.random() > 0.5) step *= -1;
+              let targetX = x + step;
+              const minX = -50;
+              const maxX = screenWidth - 350;
+              if (targetX < minX) targetX = minX;
+              if (targetX > maxX) targetX = maxX;
+              const dist = targetX - x;
+              if (Math.abs(dist) < 10) return;
+              const duration = Math.abs(dist) * 5;
+              setDirection(dist > 0 ? 1 : -1);
+              setIsWalking(true);
+              setX(targetX);
+              if (Math.random() > 0.8) triggerReaction(PetMood.HAPPY, 'idle', 2000);
+              setTimeout(() => { setIsWalking(false); }, duration); 
+            } else {
+              setIsWalking(false);
+              if (Math.random() > 0.7) triggerReaction(PetMood.IDLE, 'idle');
+            }
+          };
+          const timer = setTimeout(planNextMove, 1500);
+          walkIntervalRef.current = setInterval(planNextMove, 3000 + Math.random() * 3000);
+          return () => { clearTimeout(timer); if (walkIntervalRef.current) clearInterval(walkIntervalRef.current); };
+        }, [x, isDragging]);
+
+        const triggerReaction = (newMood, msgCategory, duration = 3000) => {
+          setMood(newMood);
+          const msgs = getCurrentMessages()[msgCategory];
+          if (msgs && msgs.length > 0) { setMessage(msgs[Math.floor(Math.random() * msgs.length)]); setShowBubble(true); }
+          if (clickTimeoutRef.current) clearTimeout(clickTimeoutRef.current);
+          clickTimeoutRef.current = setTimeout(() => { setMood(PetMood.IDLE); setShowBubble(false); }, duration);
+        };
+
+        const handleMouseDown = (e) => { e.preventDefault(); e.stopPropagation(); setIsDragging(true); triggerReaction(PetMood.SURPRISED, 'surprised'); playSfx('pet-surprised'); };
+
+        useEffect(() => {
+          const handleMouseUp = () => { if (isDragging) { setIsDragging(false); setY(0); setTimeout(() => setMood(PetMood.IDLE), 500); } };
+          const handleMouseMove = (e) => { if (isDragging) { setX(prev => prev + e.movementX); setY(prev => prev + e.movementY); } };
+          window.addEventListener('mouseup', handleMouseUp);
+          window.addEventListener('mousemove', handleMouseMove);
+          return () => { window.removeEventListener('mouseup', handleMouseUp); window.removeEventListener('mousemove', handleMouseMove); };
+        }, [isDragging]);
+
+        const renderBubbles = () => (
+          <g className="pointer-events-none">
+             <circle cx="50" cy="140" r="6" fill={isPinkSkin ? '#FFCCDD' : '#00E5FF'} opacity="0.6" className="animate-float" style={{animationDuration: '3s', animationDelay: '0s'}} />
+             <circle cx="160" cy="50" r="4" fill="#FFFFFF" opacity="0.8" className="animate-float" style={{animationDuration: '4s', animationDelay: '1s'}} />
+             <circle cx="40" cy="60" r="8" fill={isCat ? '#FDBA74' : (isPinkSkin ? '#FFF' : '#FF0055')} opacity="0.4" className="animate-float" style={{animationDuration: '5s', animationDelay: '2s'}} />
+             <circle cx="170" cy="130" r="3" fill="#CCFF00" opacity="0.7" className="animate-float" style={{animationDuration: '3.5s', animationDelay: '0.5s'}} />
+             <circle cx="110" cy="30" r="5" fill="#FFFFFF" opacity="0.5" className="animate-float" style={{animationDuration: '6s', animationDelay: '1.5s'}} />
+          </g>
+        );
+
+        const renderCat = () => (
+          <svg viewBox="0 0 200 200" className="w-full h-full overflow-visible drop-shadow-xl">
+              {renderBubbles()}
+              <g className="animate-wiggle origin-bottom" style={{ transformOrigin: '150px 150px' }}> <path d="M140,140 Q170,110 160,80" stroke="#FDBA74" strokeWidth="12" fill="none" strokeLinecap="round" /> </g>
+              <path d="M50,70 L40,30 L80,60 Z" fill="#FDBA74" stroke="black" strokeWidth="3" />
+              <path d="M150,70 L160,30 L120,60 Z" fill="#FDBA74" stroke="black" strokeWidth="3" />
+              <ellipse cx="100" cy="110" rx="60" ry="55" fill="#FDBA74" stroke="black" strokeWidth="3" />
+              <path d="M100,60 L90,75 L110,75 Z" fill="#C2410C" opacity="0.5" />
+              <path d="M150,110 L135,105 L135,115 Z" fill="#C2410C" opacity="0.5" />
+              <path d="M50,110 L65,105 L65,115 Z" fill="#C2410C" opacity="0.5" />
+              <ellipse cx="100" cy="130" rx="30" ry="25" fill="#FFF7ED" opacity="0.8" />
+              <g transform="translate(100, 100)">
+                 {blink || mood === PetMood.SLEEP ? ( <g fill="none" stroke="black" strokeWidth="3"> <path d="M-25,0 L-15,0" /> <path d="M15,0 L25,0" /> </g> ) : mood === PetMood.HAPPY || mood === PetMood.LOVE ? ( <g fill="none" stroke="black" strokeWidth="3"> <path d="M-25,5 Q-20,-5 -15,5" /> <path d="M15,5 Q20,-5 25,5" /> </g> ) : ( <g> <g transform={`translate(${-20 + eyePosition.x}, ${eyePosition.y})`}> <ellipse cx="0" cy="0" rx="8" ry="10" fill="white" stroke="black" strokeWidth="2" /> <circle cx="0" cy="0" r="3" fill="black" /> </g> <g transform={`translate(${20 + eyePosition.x}, ${eyePosition.y})`}> <ellipse cx="0" cy="0" rx="8" ry="10" fill="white" stroke="black" strokeWidth="2" /> <circle cx="0" cy="0" r="3" fill="black" /> </g> </g> )}
+                 <path d="M-3,8 L3,8 L0,12 Z" fill="pink" stroke="black" strokeWidth="1" />
+                 <path d="M-3,12 Q-8,18 -15,14 M3,12 Q8,18 15,14" fill="none" stroke="black" strokeWidth="2" />
+                 <g stroke="black" strokeWidth="1" opacity="0.6"> <line x1="-30" y1="10" x2="-50" y2="5" /> <line x1="-30" y1="15" x2="-50" y2="15" /> <line x1="30" y1="10" x2="50" y2="5" /> <line x1="30" y1="15" x2="50" y2="15" /> </g>
+              </g>
+              {mood === PetMood.ANGRY && <text x="130" y="60" fontSize="30" fill="red" fontWeight="bold">💢</text>}
+              {mood === PetMood.LOVE && <text x="130" y="60" fontSize="30" fill="#FF69B4">💗</text>}
+              {mood === PetMood.SLEEP && <text x="140" y="70" fontSize="24" fill="#666">Zzz</text>}
+          </svg>
+        );
+
+        const renderAnimeGirl = () => (
+          <svg viewBox="0 0 200 200" className="w-full h-full overflow-visible drop-shadow-xl">
+              <defs> <filter id="glow" x="-20%" y="-20%" width="140%" height="140%"> <feGaussianBlur stdDeviation="2" result="blur"/> <feComposite in="SourceGraphic" in2="blur" operator="over"/> </filter> </defs>
+              {renderBubbles()}
+              {!isPinkSkin ? ( <g stroke="black" strokeWidth="2.5" fill={colors.hair}> <path d="M50,80 Q30,120 20,150 Q15,170 30,175 Q45,170 40,150 Q45,120 60,80 Z" /> <path d="M150,80 Q170,120 180,150 Q185,170 170,175 Q155,170 160,150 Q155,120 140,80 Z" /> <path d="M60,40 Q100,10 140,40 L140,80 Q100,90 60,80 Z" /> </g> ) : ( <path d="M55,80 Q40,110 40,130 Q40,150 70,150 L130,150 Q160,150 160,130 Q160,110 145,80 Q150,0 100,0 Q50,0 55,80" fill={colors.hair} stroke="black" strokeWidth="2.5" /> )}
+              {isPinkSkin && ( <g transform="translate(100, 110)" stroke="black" strokeWidth="2" fill="#FFF"> <path d="M-25,10 Q-50,-10 -60,0 Q-50,20 -40,15 Q-50,30 -30,25 Z" /> <path d="M25,10 Q50,-10 60,0 Q50,20 40,15 Q50,30 30,25 Z" /> </g> )}
+              <g transform="translate(100, 135)"> <rect x="-5" y="-25" width="10" height="20" fill={colors.skin} stroke="black" strokeWidth="0" /> {!isPinkSkin ? ( <g> <path d="M-7,-20 Q-28,-5 -28,40 L-20,40 L-20,10 L20,10 L20,40 L28,40 Q28,-5 7,-20 Z" fill={colors.skin} stroke="black" strokeWidth="2.5" /> <path d="M-14,-20 L-16,40 L16,40 L14,-20 Q0,-10 -14,-20" fill={colors.clothes} stroke="black" strokeWidth="2.5" /> <path d="M-8,15 L8,30 M8,15 L-8,30" stroke="#FF0055" strokeWidth="3" opacity="0.9" strokeLinecap="round" /> <path d="M-26,15 L-22,18 M-26,22 L-22,25" stroke="#00E5FF" strokeWidth="2" opacity="0.7" /> </g> ) : ( <g> <path d="M0,-35 L-45,60 L45,60 Z" fill={colors.clothes} stroke="black" strokeWidth="2.5" /> <path d="M-8,5 L-15,0 L-8,-5 L8,-5 L15,0 L8,5 Z" fill={colors.acc} stroke="black" strokeWidth="1.5" /> </g> )} </g>
+              <g transform="translate(100, 95)">
+                  <path d="M-38,-25 C-42,15 -20,28 0,28 C20,28 42,15 38,-25 Z" fill={colors.skin} stroke="black" strokeWidth="2.5" />
+                  <ellipse cx="-25" cy="12" rx="6" ry="3" fill={colors.blush} opacity="0.6" /> <ellipse cx="25" cy="12" rx="6" ry="3" fill={colors.blush} opacity="0.6" />
+                  {blink || mood === PetMood.SLEEP ? ( <g stroke="black" strokeWidth="2.5" fill="none"> <path d="M-28,0 Q-20,5 -12,0" /> <path d="M12,0 Q20,5 28,0" /> </g> ) : mood === PetMood.HAPPY || mood === PetMood.LOVE ? ( <g stroke="black" strokeWidth="2.5" fill="none"> <path d="M-28,5 Q-20,-5 -12,5" /> <path d="M12,5 Q20,-5 28,5" /> </g> ) : ( <g> <g transform={`translate(${-22 + eyePosition.x}, ${eyePosition.y})`}> <path d="M-14,-9 Q0,-14 14,-9" stroke="black" strokeWidth="2.5" fill="none" /> <ellipse cx="0" cy="1" rx="11" ry="13" fill="#FFFFFF" stroke="black" strokeWidth="1.5" /> <ellipse cx="0" cy="3" rx="6" ry="8" fill={colors.eyes} /> <circle cx="0" cy="3" r="2.5" fill="#111" /> <circle cx="-3" cy="-2" r="3" fill="white" /> </g> <g transform={`translate(${22 + eyePosition.x}, ${eyePosition.y})`}> <path d="M-14,-9 Q0,-14 14,-9" stroke="black" strokeWidth="2.5" fill="none" /> <ellipse cx="0" cy="1" rx="11" ry="13" fill="#FFFFFF" stroke="black" strokeWidth="1.5" /> <ellipse cx="0" cy="3" rx="6" ry="8" fill={colors.eyes} /> <circle cx="0" cy="3" r="2.5" fill="#111" /> <circle cx="-3" cy="-2" r="3" fill="white" /> </g> {!isPinkSkin && ( <g opacity="0.3" fill="none" stroke="#500" strokeWidth="2"> <path d="M-28,10 Q-20,16 -12,10" /> <path d="M12,10 Q20,16 28,10" /> </g> )} </g> )}
+                  <g transform="translate(0, 18)"> {mood === PetMood.SURPRISED ? ( <circle r="3" fill="none" stroke="black" strokeWidth="2" /> ) : mood === PetMood.HAPPY || mood === PetMood.LOVE ? ( <path d="M-4,-2 Q0,4 4,-2" fill="none" stroke="black" strokeWidth="2" /> ) : ( <path d="M-3,0 L3,0" stroke="black" strokeWidth="2" strokeLinecap="round" /> )} </g>
+                  <path d="M-40,-30 Q-45,-10 -35,20 L-30,5 L-20,-10 L-10,5 L0,-15 L10,5 L20,-10 L30,5 L35,20 Q45,-10 40,-30 Q0,-42 -40,-30" fill={colors.hair} stroke="black" strokeWidth="2.5" />
+                  {!isPinkSkin && ( <g transform="translate(0, -38) rotate(-5)"> <rect x="-35" y="-8" width="25" height="16" rx="5" fill="#333" stroke="black" strokeWidth="2" /> <rect x="10" y="-8" width="25" height="16" rx="5" fill="#333" stroke="black" strokeWidth="2" /> <rect x="-30" y="-4" width="15" height="8" rx="2" fill="#FF0055" opacity="0.8" /> <rect x="15" y="-4" width="15" height="8" rx="2" fill="#FF0055" opacity="0.8" /> <line x1="-10" y1="0" x2="10" y2="0" stroke="#333" strokeWidth="4" /> </g> )}
+              </g>
+              {mood === PetMood.ANGRY && <text x="130" y="60" fontSize="30" fill="red" fontWeight="bold">💢</text>}
+              {mood === PetMood.LOVE && <text x="130" y="60" fontSize="30" fill="#FF69B4">💗</text>}
+              {mood === PetMood.SLEEP && <text x="140" y="70" fontSize="24" fill="#666">Zzz</text>}
+          </svg>
+        );
+
+        return (
+          <div 
+            ref={containerRef}
+            className={`fixed z-[100] flex flex-col items-center select-none pointer-events-none`}
+            style={{ 
+              left: x, bottom: 0,
+              transform: `translate(0, ${y}px) scale(${scale}) scaleX(${direction})`, 
+              transformOrigin: 'bottom center', 
+              cursor: isDragging ? 'grabbing' : 'grab',
+              transition: isDragging ? 'none' : 'left 1s linear, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)' 
+            }}
+          >
+            <div className={`absolute -top-32 right-12 bg-white border-[3px] border-black px-4 py-3 shadow-[4px_4px_0px_rgba(0,0,0,1)] font-anime text-lg font-bold text-black whitespace-nowrap z-50 transition-all duration-300 origin-bottom-right pointer-events-none ${showBubble ? 'opacity-100 scale-100 rotate-0' : 'opacity-0 scale-50 rotate-12'}`} style={{ borderRadius: '20px 20px 5px 20px' }}>
+              <span style={{ display: 'inline-block', transform: `scaleX(${direction})` }}>{message}</span>
+            </div>
+            <div className={`relative w-[400px] h-[500px] drop-shadow-2xl pointer-events-auto ${isDragging ? 'animate-bounce' : isWalking ? 'animate-bounce' : 'animate-float'}`} style={{ animationDuration: isWalking ? '0.5s' : '4s' }} onMouseDown={handleMouseDown} onClick={(e) => { if (!isDragging) { e.stopPropagation(); triggerReaction(PetMood.HAPPY, 'happy'); playSfx('pet-happy'); } }} onDoubleClick={(e) => { e.stopPropagation(); triggerReaction(PetMood.LOVE, 'love'); playSfx('success'); }}>
+               {isCat ? renderCat() : renderAnimeGirl()}
+            </div>
+             <div className="absolute bottom-10 flex gap-2 opacity-0 group-hover:opacity-100 hover:opacity-100 transition-opacity pointer-events-auto" style={{ transform: `scaleX(${direction})` }}>
+                 <button onClick={(e) => { e.stopPropagation(); triggerReaction(PetMood.LOVE, 'love'); playSfx('success'); }} className="p-2 bg-jinx-pink border-2 border-black rounded-full hover:scale-110 transition-transform shadow-[2px_2px_0_#000]"><Heart size={16} className="text-white" fill="currentColor" /></button>
+                 <button onClick={(e) => { e.stopPropagation(); triggerReaction(PetMood.SURPRISED, 'surprised'); playSfx('pet-surprised'); }} className="p-2 bg-jinx-blue border-2 border-black rounded-full hover:scale-110 transition-transform shadow-[2px_2px_0_#000]"><Ghost size={16} className="text-black" fill="currentColor" /></button>
+              </div>
+          </div>
+        );
+      };
+
+      // Sidebar.tsx
+      const Sidebar = ({ activeCategory, onSelectCategory, currentPetId, onSelectPet, onOpenGame, onClose }) => {
+        return (
+          <aside className="w-full h-full flex flex-col p-4 border-r-4 border-black bg-paper relative overflow-y-auto">
+            <div className="absolute inset-0 bg-scribble opacity-20 pointer-events-none"></div>
+            <button onClick={onClose} className="md:hidden absolute top-2 right-2 p-2 bg-black text-white rounded-full hover:rotate-90 transition-transform z-50 shadow-[2px_2px_0_#CCFF00]"><X size={20} /></button>
+            <div className="mb-6 md:mb-8 px-2 relative z-10 transform -rotate-1 mt-2 md:mt-0">
+              <h2 className="font-anime text-4xl text-black drop-shadow-[2px_2px_0_#FF0055]">MENU</h2>
+              <div className="h-2 bg-black w-24 mt-1 rough-border-sm bg-jinx-blue"></div>
+            </div>
+            <nav className="space-y-3 mb-8 relative z-10">
+              {CATEGORIES.map((cat) => (
+                <button key={cat.id} onClick={() => onSelectCategory(cat.id)} className={`w-full text-left px-4 py-2 font-anime text-xl transition-all duration-100 flex items-center gap-3 border-2 ${activeCategory === cat.id ? 'bg-black text-white rough-border shadow-[4px_4px_0px_#CCFF00] -translate-y-1 rotate-1' : 'bg-transparent text-black border-transparent hover:border-black hover:bg-white/50'}`}>
+                  <span className="text-2xl">{cat.icon}</span><span className="font-bold tracking-widest">{cat.label}</span>
+                </button>
+              ))}
+            </nav>
+            <div className="mb-6 relative z-10">
+               <div className="flex items-center gap-2 mb-4 px-2 text-black"><Gamepad2 size={24} strokeWidth={2.5} /><h3 className="font-anime text-2xl font-black">ARCADE</h3></div>
+               <div className="space-y-3">
+                  {BUILT_IN_GAMES.map(game => (
+                    <button key={game.id} onClick={() => onOpenGame(game.id)} className={`w-full relative overflow-visible ${game.color} border-2 border-black p-3 text-left transition-transform hover:-translate-y-1 hover:shadow-[4px_4px_0_#000] rough-border-sm`}>
+                       <div className="flex justify-between items-center relative z-10"><span className="text-2xl">{game.icon}</span><span className="font-anime font-black text-black text-lg">{game.name}</span></div>
+                    </button>
+                  ))}
+               </div>
+            </div>
+            <div className="mt-auto pt-6 border-t-4 border-black border-dashed relative z-10">
+              <div className="flex items-center gap-2 mb-4 text-black"><Smile size={24} strokeWidth={2.5} /><h3 className="font-anime text-2xl font-black">PARTNER</h3></div>
+              <div className="flex gap-3 justify-center flex-wrap">
+                {PET_SKINS.map((skin) => (
+                  <button key={skin.id} onClick={() => onSelectPet(skin.id)} className={`w-12 h-12 rounded-full border-2 border-black transition-all overflow-hidden ${currentPetId === skin.id ? 'ring-4 ring-jinx-pink ring-offset-2 scale-110' : 'hover:scale-110 opacity-80 hover:opacity-100'}`} style={{ backgroundColor: skin.avatarColor }} title={skin.name} />
+                ))}
+              </div>
+            </div>
+          </aside>
+        );
+      };
+
+      // Header.tsx
+      const Header = ({ onOpenSettings, onToggleMenu }) => {
+        return (
+          <header className="h-16 md:h-24 bg-paper border-b-4 border-black flex items-center justify-between px-4 md:px-6 flex-shrink-0 z-30 relative overflow-hidden">
+             <div className="absolute top-0 left-20 w-32 h-32 bg-jinx-pink rounded-full blur-xl opacity-20 pointer-events-none"></div>
+             <div className="absolute bottom-0 right-40 w-40 h-10 bg-jinx-blue rotate-12 blur-xl opacity-20 pointer-events-none"></div>
+             <div className="flex items-center gap-3 relative z-10">
+                <button onClick={onToggleMenu} className="md:hidden p-2 -ml-2 text-black hover:scale-110 transition-transform"><Menu size={28} strokeWidth={3} /></button>
+                <div className="w-10 h-10 md:w-12 md:h-12 bg-black flex items-center justify-center transform -rotate-6 shadow-[3px_3px_0_#CCFF00] md:shadow-[4px_4px_0_#CCFF00] rough-border-sm"><span className="text-white text-2xl md:text-3xl font-anime">X</span></div>
+                <div className="flex flex-col -space-y-1 md:-space-y-2">
+                  <h1 className="text-2xl md:text-4xl font-anime font-black text-black tracking-tighter" style={{ textShadow: '2px 2px 0 #00E5FF' }}>DOODLE</h1>
+                  <span className="hidden sm:block text-sm md:text-xl font-anime text-jinx-pink tracking-widest font-bold transform rotate-1 ml-1">NAVIGATOR</span>
+                </div>
+             </div>
+             <div className="flex items-center gap-2 md:gap-4 relative z-10">
+                <button className="p-2 hover:rotate-12 transition-transform"><Bell size={24} md:size={28} strokeWidth={2.5} className="text-black" /></button>
+                <button onClick={onOpenSettings} className="flex items-center gap-2 bg-jinx-blue text-black px-3 py-1.5 md:px-6 md:py-2 font-anime font-black text-sm md:text-lg rough-border-sm hover:-translate-y-1 hover:shadow-[4px_4px_0_#000] transition-all"><Settings size={18} md:size={20} strokeWidth={2.5} /><span className="hidden sm:inline">SETUP</span></button>
+             </div>
+          </header>
+        );
+      };
+
+      // App.tsx
+      const App = () => {
+        const [links, setLinks] = useState(() => {
+          const saved = localStorage.getItem('doodle-links');
+          return saved ? JSON.parse(saved) : DEFAULT_LINKS;
+        });
+        const [isModalOpen, setIsModalOpen] = useState(false);
+        const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+        const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+        const [petMood, setPetMood] = useState(PetMood.IDLE);
+        const [activeCategory, setActiveCategory] = useState('ALL');
+        const [currentPetId, setCurrentPetId] = useState('girl-white');
+        const [activeGameId, setActiveGameId] = useState(null);
+        const [petScale, setPetScale] = useState(() => {
+          const saved = localStorage.getItem('doodle-pet-scale');
+          const defaultScale = window.innerWidth < 768 ? 0.6 : 1.0;
+          return saved ? parseFloat(saved) : defaultScale;
+        });
+
+        useEffect(() => { localStorage.setItem('doodle-links', JSON.stringify(links)); }, [links]);
+        useEffect(() => { localStorage.setItem('doodle-pet-scale', petScale.toString()); }, [petScale]);
+
+        const handleAddLink = (newLink) => {
+          playSfx('success');
+          const link = { ...newLink, id: Date.now().toString() };
+          setLinks([...links, link]);
+          setPetMood(PetMood.HAPPY); 
+        };
+
+        const handleDeleteLink = (id) => {
+          playSfx('delete');
+          setLinks(links.filter(l => l.id !== id));
+          setPetMood(PetMood.SURPRISED);
+        };
+
+        const filteredLinks = activeCategory === 'ALL' ? links : links.filter(link => link.category === activeCategory);
+
+        return (
+          <div className="h-[100dvh] flex flex-col font-anime text-gray-800 bg-transparent overflow-hidden">
+            <Header onOpenSettings={() => { setIsSettingsOpen(true); playSfx('open'); }} onToggleMenu={() => { setIsMobileMenuOpen(true); playSfx('scribble'); }} />
+            <div className="flex flex-1 overflow-hidden relative">
+              {isMobileMenuOpen && ( <div className="fixed inset-0 bg-black/50 z-40 md:hidden backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)} /> )}
+              <div className={`fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-300 ease-out md:relative md:translate-x-0 md:z-0 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+                <Sidebar activeCategory={activeCategory} onSelectCategory={(c) => { setActiveCategory(c); playSfx('click'); setIsMobileMenuOpen(false); }} currentPetId={currentPetId} onSelectPet={(id) => { setCurrentPetId(id); playSfx('pop'); }} onOpenGame={(id) => { setActiveGameId(id); playSfx('open'); setIsMobileMenuOpen(false); }} onClose={() => setIsMobileMenuOpen(false)} />
+              </div>
+              <main className="flex-1 overflow-y-auto relative p-4 md:p-8 scroll-smooth w-full">
+                 <div className="mt-4 md:mt-8"><SearchBar /></div>
+                 <div className="max-w-6xl mx-auto pb-40 px-2 md:px-4">
+                   <div className="mb-8 border-b-4 border-black pb-2 flex items-end justify-between transform rotate-1">
+                      <h3 className="text-3xl md:text-5xl font-black text-black break-words" style={{ textShadow: '4px 4px 0 #CCFF00' }}>{activeCategory === 'ALL' ? 'DASHBOARD' : activeCategory}</h3>
+                   </div>
+                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
+                     {filteredLinks.map((link, index) => ( <DoodleCard key={link.id} link={link} onDelete={handleDeleteLink} index={index} /> ))}
+                     <button onClick={() => { setIsModalOpen(true); playSfx('scribble'); }} className="min-h-[160px] rough-border border-dashed border-4 border-gray-400 bg-transparent hover:bg-white hover:border-black hover:border-solid flex flex-col items-center justify-center text-gray-400 hover:text-jinx-pink transition-all group">
+                       <Plus size={48} strokeWidth={3} className="group-hover:rotate-90 transition-transform" /><span className="text-2xl font-bold mt-2">ADD NEW</span>
+                     </button>
+                   </div>
+                 </div>
+              </main>
+            </div>
+            <Pet mood={petMood} setMood={setPetMood} skinId={currentPetId} scale={petScale} />
+            <AddLinkModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onAdd={handleAddLink} />
+            <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} links={links} onImport={(l) => { setLinks(l); playSfx('success'); }} onReset={() => { setLinks(DEFAULT_LINKS); playSfx('delete'); }} petScale={petScale} onScaleChange={setPetScale} />
+            <GameCenterModal gameId={activeGameId} onClose={() => setActiveGameId(null)} />
+          </div>
+        );
+      };
+
+      // --- Index ---
+      const root = ReactDOM.createRoot(document.getElementById('root'));
+      root.render(
+        <React.StrictMode>
+          <App />
+        </React.StrictMode>
+      );
+    </script>
+</body>
+</html>
